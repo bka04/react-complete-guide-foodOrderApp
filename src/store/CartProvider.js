@@ -29,12 +29,33 @@ const cartReducer = (state, action) => { //state is last state snapshot managed 
             updatedItems = state.items.concat(action.item);
         }
 
-        return {
+        return { //have to return the new state
             items: updatedItems,
             totalAmount: updatedTotalAmount
         };
     }
-    return defaultCartState; //have to return the new state
+    if (action.type === 'REMOVE') {
+        const existingCartItemIndex = state.items.findIndex(
+            item => item.id === action.id
+        );
+        const existingItem = state.items[existingCartItemIndex];
+        const updatedTotalAmount = state.totalAmount - existingItem.price;
+        let updatedItems;
+        if (existingItem.amount === 1) {
+            updatedItems = state.items.filter(item => item.id !== action.id);
+        } else {
+            const updatedItem = { ...existingItem, amount: existingItem.amount - 1};
+            updatedItems = [...state.items];
+            updatedItems[existingCartItemIndex] = updatedItem;
+        }
+
+        return { //have to return the new state
+            items: updatedItems,
+            totalAmount: updatedTotalAmount
+        };
+    }
+
+    return defaultCartState;
 }
 
 const CartProvider = props => {
